@@ -8,10 +8,8 @@ import com.bumptech.glide.Glide
 import com.example.foodapp.dataClasses.LocalMeals
 import com.example.foodapp.databinding.MostPopularCardBinding
 
-class MostPopularAdapter(var context: Context, var list: MutableList<LocalMeals> , var mostPopularItemInterface: MostPopularItemInterface):RecyclerView.Adapter<MostPopularAdapter.ViewHolder>() {
-    class ViewHolder(val binding: MostPopularCardBinding):RecyclerView.ViewHolder(binding.root) {
-
-    }
+class MostPopularAdapter(private var context: Context, private var list: MutableList<LocalMeals>, private var mostPopularItemInterface: MostPopularItemInterface):RecyclerView.Adapter<MostPopularAdapter.ViewHolder>() {
+    class ViewHolder(val binding: MostPopularCardBinding):RecyclerView.ViewHolder(binding.root)
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MostPopularAdapter.ViewHolder {
         val view = MostPopularCardBinding.inflate(LayoutInflater.from(parent.context),parent,false)

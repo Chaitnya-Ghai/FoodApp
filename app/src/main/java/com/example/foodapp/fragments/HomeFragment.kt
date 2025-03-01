@@ -6,12 +6,16 @@ import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
+import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
 import com.example.foodapp.activities.MainActivity
 import com.example.foodapp.activities.MealActivity
+import com.example.foodapp.adapters.CategoryInterface
+import com.example.foodapp.adapters.CategoryListAdapter
 import com.example.foodapp.adapters.MostPopularAdapter
 import com.example.foodapp.adapters.MostPopularItemInterface
 import com.example.foodapp.dataClasses.Meal
@@ -28,7 +32,7 @@ private const val ARG_PARAM2 = "param2"
  * Use the [HomeFragment.newInstance] factory method to
  * create an instance of this fragment.
  */
-class HomeFragment : Fragment(), MostPopularItemInterface {
+class HomeFragment : Fragment(), MostPopularItemInterface , CategoryInterface{
     private var param1: String? = null
     private var param2: String? = null
     private lateinit var randomMeal: Meal
@@ -56,13 +60,15 @@ class HomeFragment : Fragment(), MostPopularItemInterface {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         homeMvvm.getPopularMeals("Indian")
+        homeMvvm.getRandomMeal()
+        homeMvvm.getCategoryData()
+
         homeMvvm.observePopularItemsLiveData().observe(viewLifecycleOwner){ res->
             val adapter = MostPopularAdapter(mainActivity,res.toMutableList(),this)
             binding.rvMealsPopular.adapter=adapter
             binding.rvMealsPopular.layoutManager=LinearLayoutManager(mainActivity,LinearLayoutManager.HORIZONTAL,false)
             adapter.notifyDataSetChanged()
         }
-        homeMvvm.getRandomMeal()
         homeMvvm.observeRandomMealLiveData().observe(viewLifecycleOwner,
             object :Observer<Meal>{
             override fun onChanged(value: Meal) {
@@ -72,14 +78,18 @@ class HomeFragment : Fragment(), MostPopularItemInterface {
                 this@HomeFragment.randomMeal = value
             }
             })
-
+        homeMvvm.observeCategoryLiveData().observe(viewLifecycleOwner){ res->
+            binding.rvCategory.layoutManager=GridLayoutManager(mainActivity,3)
+            val categoryListAdapter = CategoryListAdapter(mainActivity,res.categories.toMutableList(),this)
+            binding.rvCategory.adapter=categoryListAdapter
+            categoryListAdapter.notifyDataSetChanged()
+        }
         binding.imgRandomMeal.setOnClickListener{
             val intent = Intent(mainActivity, MealActivity::class.java)
             intent.putExtra("mealId",randomMeal.idMeal)
             startActivity(intent)
         }
     }
-
     companion object {
         /**
          * Use this factory method to create a new instance of
@@ -99,10 +109,12 @@ class HomeFragment : Fragment(), MostPopularItemInterface {
                 }
             }
     }
-
     override fun onClick(id: String) {
         val intent = Intent(mainActivity, MealActivity::class.java)
         intent.putExtra("mealId",id)
         startActivity(intent)
+    }
+    override fun onCategoryClick(categoryId: String) {
+        Toast.makeText(mainActivity, "Clicked", Toast.LENGTH_SHORT).show()
     }
 }
