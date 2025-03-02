@@ -1,6 +1,7 @@
 package com.example.foodapp.adapters
 
 import android.content.Context
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
@@ -24,10 +25,17 @@ class CategoryListAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        val category = list[position]  // Get the current category object
+        // Load image
         Glide.with(context)
-            .load(list[position].strCategoryThumb)
+            .load(category.strCategoryThumb)
             .into(holder.binding.imgCategory)
-        holder.binding.tvCategoryName.text = list[position].strCategory
-        holder.binding.cvCategoryListMain.setOnClickListener { categoryInterface.onCategoryClick(list[position].idCategory) }
+        // Set text
+        holder.binding.tvCategoryName.text = category.strCategory
+        // Set click listener
+        holder.binding.cvCategoryListMain.setOnClickListener {
+            categoryInterface.onCategoryClick(category.strCategory)  // Pass the actual ID
+        }
     }
+
 }

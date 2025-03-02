@@ -24,6 +24,6 @@ class MostPopularAdapter(private var context: Context, private var list: Mutable
         Glide.with(context)
             .load(list[position].strMealThumb)
             .into(holder.binding.imgPopularMeal)
-        holder.binding.imgPopularMeal.setOnClickListener { mostPopularItemInterface.onClick(list[position].idMeal) }
+        holder.binding.imgPopularMeal.setOnClickListener { mostPopularItemInterface.onMealClick(list[position].idMeal) }
     }
 }

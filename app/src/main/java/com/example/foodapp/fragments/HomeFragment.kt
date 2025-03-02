@@ -7,11 +7,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.lifecycle.Observer
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.bumptech.glide.Glide
+import com.example.foodapp.activities.CategoryMealsActivity
 import com.example.foodapp.activities.MainActivity
 import com.example.foodapp.activities.MealActivity
 import com.example.foodapp.adapters.CategoryInterface
@@ -52,7 +52,7 @@ class HomeFragment : Fragment(), MostPopularItemInterface , CategoryInterface{
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         // Inflate the layout for this fragment
         return binding.root
     }
@@ -64,20 +64,18 @@ class HomeFragment : Fragment(), MostPopularItemInterface , CategoryInterface{
         homeMvvm.getCategoryData()
 
         homeMvvm.observePopularItemsLiveData().observe(viewLifecycleOwner){ res->
-            val adapter = MostPopularAdapter(mainActivity,res.toMutableList(),this)
+            val adapter = res?.let { MostPopularAdapter(mainActivity, it.toMutableList(),this) }
             binding.rvMealsPopular.adapter=adapter
             binding.rvMealsPopular.layoutManager=LinearLayoutManager(mainActivity,LinearLayoutManager.HORIZONTAL,false)
-            adapter.notifyDataSetChanged()
+            adapter?.notifyDataSetChanged()
         }
-        homeMvvm.observeRandomMealLiveData().observe(viewLifecycleOwner,
-            object :Observer<Meal>{
-            override fun onChanged(value: Meal) {
-                Glide.with(mainActivity)
-                    .load(value.strMealThumb)
-                    .into(binding.imgRandomMeal)
-                this@HomeFragment.randomMeal = value
-            }
-            })
+        homeMvvm.observeRandomMealLiveData().observe(viewLifecycleOwner
+        ) { value ->
+            Glide.with(mainActivity)
+                .load(value.strMealThumb)
+                .into(binding.imgRandomMeal)
+            this@HomeFragment.randomMeal = value
+        }
         homeMvvm.observeCategoryLiveData().observe(viewLifecycleOwner){ res->
             binding.rvCategory.layoutManager=GridLayoutManager(mainActivity,3)
             val categoryListAdapter = CategoryListAdapter(mainActivity,res.categories.toMutableList(),this)
@@ -109,12 +107,15 @@ class HomeFragment : Fragment(), MostPopularItemInterface , CategoryInterface{
                 }
             }
     }
-    override fun onClick(id: String) {
+    override fun onMealClick(id: String) {
         val intent = Intent(mainActivity, MealActivity::class.java)
         intent.putExtra("mealId",id)
         startActivity(intent)
     }
     override fun onCategoryClick(categoryId: String) {
-        Toast.makeText(mainActivity, "Clicked", Toast.LENGTH_SHORT).show()
+        Toast.makeText(mainActivity, "categoryId: $categoryId", Toast.LENGTH_SHORT).show()
+        val intent = Intent( mainActivity , CategoryMealsActivity::class.java)
+        intent.putExtra("categoryId",categoryId)
+        startActivity(intent)
     }
 }

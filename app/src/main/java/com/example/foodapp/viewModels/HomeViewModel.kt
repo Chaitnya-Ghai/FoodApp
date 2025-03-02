@@ -16,64 +16,78 @@ import retrofit2.Response
 
 class HomeViewModel : ViewModel() {
     private var randomMealLiveData = MutableLiveData<Meal>()
-    private var popularItemsLiveData = MutableLiveData<List<LocalMeals>>()
+    private var popularItemsLiveData = MutableLiveData<List<LocalMeals>?>()
     private var categoryLiveData = MutableLiveData<CategoryList>()
 
-    fun getCategoryData(){
-        RetrofitInstance.api.getCategories().enqueue(object : Callback<CategoryList>{
+    fun getCategoryData() {
+        RetrofitInstance.api.getCategories().enqueue(object : Callback<CategoryList> {
             override fun onResponse(call: Call<CategoryList>, response: Response<CategoryList>) {
-                if (response.body() !=null){
-                    val excludedCategories = listOf("Beef" , "Chicken" , "Pork")  // Add more categories here if needed
-                    val filteredCategories = response.body()!!.categories.filter { it.strCategory !in excludedCategories }
-                    val updatedResponse = response.body()!!.copy(categories = filteredCategories)
-                    categoryLiveData.postValue(updatedResponse)
-                }else{
+                if (response.isSuccessful && response.body() != null) {
+                    val originalCategories = response.body()?.categories ?: emptyList()
+                    val excludedCategories = listOf("Beef", "Chicken", "Pork")  // Add more if needed
+                    val filteredCategories = originalCategories.filter { it.strCategory !in excludedCategories }
+                    categoryLiveData.postValue(CategoryList(filteredCategories))
+                } else {
+                    Log.e("API_RESPONSE", "getCategoryData Response unsuccessful: ${response.errorBody()?.string()}")
                     return
                 }
             }
+
             override fun onFailure(call: Call<CategoryList>, t: Throwable) {
-                Log.d("DEBUG", t.message.toString())
+                Log.e("API_ERROR", "API call failed: ${t.message}")
             }
         })
     }
-    fun  getPopularMeals(nationality:String){
-        RetrofitInstance.api.getMealsByCountry(nationality).enqueue(object : Callback<AreaMealList>{
+
+    fun getPopularMeals(nationality: String) {
+        RetrofitInstance.api.getMealsByCountry(nationality).enqueue(object : Callback<AreaMealList> {
             override fun onResponse(call: Call<AreaMealList>, response: Response<AreaMealList>) {
-                if (response.body() != null) {
-                    popularItemsLiveData.postValue(response.body()!!.meals) // use .postValue() instead of .value to update LiveData safely.
-//  If code is already on the main thread, we can use .value(safely);
-//  But since Retrofit runs on a background thread, this might cause issues. therefore i use .postValue here
-                }else{
+                if (response.isSuccessful && response.body() != null) {
+                    val mealList = response.body()?.meals
+                    if ( !mealList.isNullOrEmpty() ) {
+                        popularItemsLiveData.postValue(mealList)
+                    } else {
+                        Log.e(" API_RESPONSE", " getMealsByCountry Received empty meals list")
+                    }
+                } else {
+                    Log.e("API_RESPONSE", "getMealsByCountry Response unsuccessful: ${response.errorBody()?.string()}")
                     return
                 }
             }
+
             override fun onFailure(call: Call<AreaMealList>, t: Throwable) {
-                Log.d("DEBUG", t.message.toString())
+                Log.e("API_ERROR", "API call failed: ${t.message}")
             }
-        }
-        )
+        })
     }
-    fun getRandomMeal(){
+
+    fun getRandomMeal() {
         RetrofitInstance.api.getRandomMeal().enqueue(object : Callback<MealList> {
             override fun onResponse(call: Call<MealList>, response: Response<MealList>) {
-                if (response.body() != null){
-                    val randomMeal : Meal = response.body()!!.meals[0]
-                    randomMealLiveData.value=randomMeal
-                    Log.d("Test", "meal name :${randomMeal.strMeal} ")
-                }
-                else{
-                    return
+                if (response.isSuccessful && response.body() != null) {
+                    val mealList = response.body()?.meals
+                    if (!mealList.isNullOrEmpty()) {
+                        val randomMeal: Meal = mealList[0]
+                        randomMealLiveData.postValue(randomMeal)
+                        Log.d("Test", "Meal name: ${randomMeal.strMeal}")
+                    } else {
+                        Log.e("Test", "Received empty meals list")
+                    }
+                } else {
+                    Log.e("Test", "Response unsuccessful or body is null: ${response.errorBody()?.string()}")
                 }
             }
+
             override fun onFailure(call: Call<MealList>, t: Throwable) {
-                Log.e("HomeFragment", t.message.toString() )
+                Log.e("HomeFragment", "API call failed: ${t.message}")
             }
         })
     }
+
     fun observeCategoryLiveData():LiveData<CategoryList>{
         return categoryLiveData
     }
-    fun observePopularItemsLiveData():LiveData<List<LocalMeals>>{
+    fun observePopularItemsLiveData(): MutableLiveData<List<LocalMeals>?> {
         return popularItemsLiveData
     }
     fun observeRandomMealLiveData():LiveData<Meal>{
