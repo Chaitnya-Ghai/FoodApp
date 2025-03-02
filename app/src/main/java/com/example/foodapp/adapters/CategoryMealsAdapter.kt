@@ -8,7 +8,7 @@ import com.bumptech.glide.Glide
 import com.example.foodapp.dataClasses.MealsByCategory
 import com.example.foodapp.databinding.MealItemBinding
 
-class CategoryMealsAdapter(private val context: Context, private var list: List<MealsByCategory>) : RecyclerView.Adapter<CategoryMealsAdapter.ViewHolder>() {
+class CategoryMealsAdapter(private val context: Context, private var list: List<MealsByCategory>, private var mealItemInterface: MealItemInterface) : RecyclerView.Adapter<CategoryMealsAdapter.ViewHolder>() {
 
     class ViewHolder(val binding: MealItemBinding) : RecyclerView.ViewHolder(binding.root)
 
@@ -19,6 +19,7 @@ class CategoryMealsAdapter(private val context: Context, private var list: List<
     override fun getItemCount(): Int = list.size
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
+        holder.binding.cvMainMealItem.setOnClickListener { mealItemInterface.onMealItemClick(list[position].idMeal) }
         holder.binding.tvFavMealName.text = list[position].strMeal
         Glide.with(context).load(list[position].strMealThumb).into(holder.binding.imgFavMeal)
     }

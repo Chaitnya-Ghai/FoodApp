@@ -5,6 +5,7 @@
     android:backgroundTint="@color/g_loading"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     app:elevation="10dp"
+    android:id="@+id/cv_main_meal_item"
     android:layout_marginStart="@dimen/_4sdp"
     app:cardCornerRadius="5dp"
     app:cardUseCompatPadding="true">

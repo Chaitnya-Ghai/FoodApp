@@ -24,7 +24,7 @@ class HomeViewModel : ViewModel() {
             override fun onResponse(call: Call<CategoryList>, response: Response<CategoryList>) {
                 if (response.isSuccessful && response.body() != null) {
                     val originalCategories = response.body()?.categories ?: emptyList()
-                    val excludedCategories = listOf("Beef", "Chicken", "Pork")  // Add more if needed
+                    val excludedCategories = listOf("Beef", "Chicken", "Pork")
                     val filteredCategories = originalCategories.filter { it.strCategory !in excludedCategories }
                     categoryLiveData.postValue(CategoryList(filteredCategories))
                 } else {

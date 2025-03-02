@@ -4,8 +4,10 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
+import android.view.View
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.lifecycle.ViewModelProvider
@@ -22,13 +24,11 @@ class MealActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
-        // Correct way to initialize ViewBinding
         binding = ActivityMealBinding.inflate(layoutInflater)
         setContentView(binding.root)
         mealMvvm = ViewModelProvider(this)[MealViewModel::class.java]
-        // Get data from Intent
-        val mealId = intent.getStringExtra("mealId")
-
+        startLoading()
+        val mealId = intent.getStringExtra("mealId")// Get data from Intent
         ViewCompat.setOnApplyWindowInsetsListener(findViewById(R.id.main)) { v, insets ->
             val systemBars = insets.getInsets(WindowInsetsCompat.Type.systemBars())
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom)
@@ -36,6 +36,7 @@ class MealActivity : AppCompatActivity() {
         }
         mealMvvm.getMealDetail(mealId.toString())
         mealMvvm.observeMealDetailsLiveData().observe(this) { result ->
+            hideLoading()
             binding.collapsingToolbarLayout.title = result.strMeal
             Glide.with(applicationContext)
                 .load(result.strMealThumb)
@@ -49,13 +50,26 @@ class MealActivity : AppCompatActivity() {
                 append("Area : ")
                 append(result.strArea)
             }
-            binding.tvContent.text = result.strInstructions
+            binding.tvContent.text = result.strIngredient1
             binding.tvInstructions.text = result.strInstructions
             Log.d("DEBUG", "Meal name: ${result.strMeal}")
         }
         binding.imgYoutube.setOnClickListener {
             val i = Intent(Intent.ACTION_VIEW, Uri.parse(youtubeLink)).also { startActivity(it) }
         }
-
+    }
+    private fun hideLoading() {
+        binding.apply {
+            loadingGifMeals.visibility = View.INVISIBLE
+            progressBar.visibility = View.INVISIBLE
+            main.setBackgroundColor(ContextCompat.getColor(applicationContext,R.color.white))
+        }
+    }
+    private fun startLoading() {
+        binding.apply {
+            progressBar.visibility = View.VISIBLE
+            loadingGifMeals.visibility = View.VISIBLE
+            main.setBackgroundColor(ContextCompat.getColor(applicationContext,R.color.g_loading))
+        }
     }
 }

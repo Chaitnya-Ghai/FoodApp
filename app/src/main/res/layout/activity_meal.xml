@@ -20,10 +20,18 @@
             app:contentScrim="@color/accent"
             app:layout_scrollFlags="scroll|snap|exitUntilCollapsed"
             app:titleEnabled="true"
-            app:collapsedTitleGravity="center"
-            app:expandedTitleGravity="start|center_vertical"
             app:expandedTitleTextAppearance="@style/ExpandedTitleStyle"
             app:collapsedTitleTextAppearance="@style/CollapsedTitleStyle">
+            <pl.droidsonroids.gif.GifImageView
+                android:id="@+id/loading_gif_meals"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintBottom_toBottomOf="parent"
+                android:src="@drawable/loading_gif"
+                android:visibility="gone"/>
             <ImageView
                 android:id="@+id/img_meal_detail"
                 android:layout_width="match_parent"
